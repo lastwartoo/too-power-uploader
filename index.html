@@ -91,8 +91,19 @@
 
   <div id="status"></div>
 
+  <!-- 🔹 숨겨진 form + iframe (여기가 핵심) -->
+  <form id="uploadForm"
+        action="https://script.google.com/macros/s/AKfycbyefQoXpr9jBVom4VYw07cktDW6aKyzE_vZIs-6xR6Th7e3Yl7Hosxcc9y1XuQETGQ/exec"
+        method="POST"
+        target="hiddenFrame"
+        style="display:none;">
+    <input type="hidden" name="payload" id="payloadInput" />
+  </form>
+
+  <iframe name="hiddenFrame" style="display:none;"></iframe>
+
   <script>
-    // === 여기만 너 Apps Script 웹앱 URL로 변경하면 됨 ===
+    // 지금은 APP_SCRIPT_URL 안 써도 됨 (form action으로 직접 사용 중)
     const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyefQoXpr9jBVom4VYw07cktDW6aKyzE_vZIs-6xR6Th7e3Yl7Hosxcc9y1XuQETGQ/exec';
 
     // 전투력 문자열 → 숫자 (168.22M, 164,110,000, 160330000 등 처리)
@@ -145,7 +156,7 @@
       box.className = ok ? 'ok' : 'err';
     }
 
-       async function sendToSheet() {
+    function sendToSheet() {
       const weekValue = document.getElementById('weekInput').value;
       const text = document.getElementById('rowsInput').value;
 
@@ -186,6 +197,10 @@
 
       // hidden input에 JSON 문자열로 넣기
       const payloadInput = document.getElementById('payloadInput');
+      if (!payloadInput) {
+        showStatus('내부 폼 요소를 찾지 못했습니다. HTML 구조를 확인해 주세요.', false);
+        return;
+      }
       payloadInput.value = JSON.stringify(payload);
 
       // 폼 제출 (hidden iframe으로 전송)
@@ -205,8 +220,6 @@
 
       showStatus(msg, true);
     }
-
-    
 
     document.getElementById('sendBtn').addEventListener('click', sendToSheet);
   </script>
