@@ -145,7 +145,7 @@
       box.className = ok ? 'ok' : 'err';
     }
 
-        async function sendToSheet() {
+       async function sendToSheet() {
       const weekValue = document.getElementById('weekInput').value;
       const text = document.getElementById('rowsInput').value;
 
@@ -178,37 +178,34 @@
         return;
       }
 
-      showStatus('시트로 전송 중...', true);
+      // 폼으로 보낼 payload 구성
+      const payload = {
+        week: week,
+        rows: rows
+      };
 
-      try {
-        // 🔴 여기만 수정
-        await fetch(APP_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',          // 👉 CORS 단순 모드
-          body: JSON.stringify({
-            week: week,
-            rows: rows
-          })
+      // hidden input에 JSON 문자열로 넣기
+      const payloadInput = document.getElementById('payloadInput');
+      payloadInput.value = JSON.stringify(payload);
+
+      // 폼 제출 (hidden iframe으로 전송)
+      const form = document.getElementById('uploadForm');
+      form.submit();
+
+      // 응답은 읽지 못하지만, 요청은 정상 전송됨
+      let msg = `✅ 시트로 전송 요청을 보냈습니다.\n`;
+      msg += `→ 구글 시트 WeekData 시트에서 데이터가 들어갔는지 확인해 주세요.\n`;
+
+      if (invalidLines.length > 0) {
+        msg += '\n⚠️ 파싱 실패한 줄:\n';
+        invalidLines.forEach(x => {
+          msg += `  - ${x.index}행: "${x.line}"\n`;
         });
-
-        // 응답을 읽을 수 없기 때문에, 그냥 "전송 시도 완료"만 표시
-        let msg = `✅ 시트로 전송 시도 완료!\n`;
-        msg += `→ 구글 시트 WeekData 시트에서 데이터가 들어갔는지 확인해 주세요.\n`;
-
-        if (invalidLines.length > 0) {
-          msg += '\n⚠️ 파싱 실패한 줄:\n';
-          invalidLines.forEach(x => {
-            msg += `  - ${x.index}행: "${x.line}"\n`;
-          });
-        }
-
-        showStatus(msg, true);
-
-      } catch (err) {
-        console.error(err);
-        showStatus('네트워크/스크립트 오류: ' + err, false);
       }
+
+      showStatus(msg, true);
     }
+
     
 
     document.getElementById('sendBtn').addEventListener('click', sendToSheet);
