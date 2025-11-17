@@ -183,14 +183,14 @@
       try {
         const res = await fetch(APP_SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          // headers: { 'Content-Type': 'application/json' }, // ❌ 이 줄 삭제
           body: JSON.stringify({
             week: week,
             rows: rows
           })
         });
 
-        const data = await res.json();
+        const data = await res.json(); // 이건 그대로 사용
 
         if (!data.ok) {
           console.error(data);
@@ -222,6 +222,7 @@
         console.error(err);
         showStatus('네트워크/스크립트 오류: ' + err, false);
       }
+
     }
 
     document.getElementById('sendBtn').addEventListener('click', sendToSheet);
