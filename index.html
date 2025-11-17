@@ -145,7 +145,7 @@
       box.className = ok ? 'ok' : 'err';
     }
 
-    async function sendToSheet() {
+        async function sendToSheet() {
       const weekValue = document.getElementById('weekInput').value;
       const text = document.getElementById('rowsInput').value;
 
@@ -181,25 +181,19 @@
       showStatus('시트로 전송 중...', true);
 
       try {
-        const res = await fetch(APP_SCRIPT_URL, {
+        // 🔴 여기만 수정
+        await fetch(APP_SCRIPT_URL, {
           method: 'POST',
-          // headers: { 'Content-Type': 'application/json' }, // ❌ 이 줄 삭제
+          mode: 'no-cors',          // 👉 CORS 단순 모드
           body: JSON.stringify({
             week: week,
             rows: rows
           })
         });
 
-        const data = await res.json(); // 이건 그대로 사용
-
-        if (!data.ok) {
-          console.error(data);
-          showStatus('오류 발생: ' + (data.message || '알 수 없는 오류'), false);
-          return;
-        }
-
-        let msg = '';
-        msg += `✅ 시트에 저장된 인원: ${data.inserted}명\n`;
+        // 응답을 읽을 수 없기 때문에, 그냥 "전송 시도 완료"만 표시
+        let msg = `✅ 시트로 전송 시도 완료!\n`;
+        msg += `→ 구글 시트 WeekData 시트에서 데이터가 들어갔는지 확인해 주세요.\n`;
 
         if (invalidLines.length > 0) {
           msg += '\n⚠️ 파싱 실패한 줄:\n';
@@ -208,22 +202,14 @@
           });
         }
 
-        if (data.unknown && data.unknown.length > 0) {
-          msg += '\n⚠️ Members에서 찾지 못한 닉네임(멤버 매칭 실패):\n';
-          data.unknown.forEach(x => {
-            msg += `  - ${x.nickname} (${x.power})\n`;
-          });
-          msg += '\n→ Members 시트의 nickname/canon_name을 확인해 주세요.';
-        }
-
         showStatus(msg, true);
 
       } catch (err) {
         console.error(err);
         showStatus('네트워크/스크립트 오류: ' + err, false);
       }
-
     }
+    
 
     document.getElementById('sendBtn').addEventListener('click', sendToSheet);
   </script>
